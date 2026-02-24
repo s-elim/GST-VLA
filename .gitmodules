@@ -1,0 +1,9 @@
+[submodule "OpenVLA"]
+	path = OpenVLA
+	url = https://github.com/openvla/openvla.git
+[submodule "SpatialVLA"]
+	path = SpatialVLA
+	url = https://github.com/SpatialVLA/SpatialVLA.git
+[submodule "HybridVLA"]
+	path = HybridVLA
+	url = https://github.com/PKU-HMI-Lab/Hybrid-VLA.git
