@@ -1,0 +1,10 @@
+torch==2.2.0
+torchvision==0.17.0
+transformers==4.40.1
+datasets
+numpy
+opencv-python
+tqdm
+hydra-core
+omegaconf
+pytest
