@@ -1,0 +1,63 @@
+# ── Model checkpoints & weights ──────────────────────────────
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+checkpoints/
+runs/
+
+# ── Python ───────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.Python
+
+# ── Virtual environments ──────────────────────────────────────
+.venv/
+venv/
+env/
+.conda/
+
+# ── Jupyter ──────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Data & large files ───────────────────────────────────────
+*.npy
+*.npz
+*.hdf5
+*.h5
+*.pkl
+*.pickle
+data/raw/
+data/processed/
+datasets/
+
+# ── Logs & outputs ───────────────────────────────────────────
+*.log
+logs/
+wandb/
+tensorboard/
+outputs/
+results/
+
+# ── IDE & OS ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Environment & secrets ─────────────────────────────────────
+.env
+*.env.*
+secrets.yaml
+
