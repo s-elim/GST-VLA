@@ -1,0 +1,77 @@
+# DEAD-VLA Default Configuration
+# ACCV 2026
+
+model:
+  # Encoder
+  img_size: 224
+  patch_size: 14
+  d_sem: 1152              # SigLIP ViT-SO400M/14
+  depth_model_size: "vitl"                                # Depth Anything V2 ViT-L
+  depth_pretrained_path: "/data/Omer/DAv2_checkpoint/depth_anything_v2_vitl.pth"
+
+  # GST (Gaussian Spatial Tokenizer)
+  d_gst: 512               # GST output token dimension
+  N_g: 128                 # Number of Gaussian spatial tokens
+  fourier_bands: 16        # 3D Fourier PE bands → d_fourier = 3*2*16 = 96
+
+  # VLM
+  vlm_model: "Qwen/Qwen2.5-VL-7B-Instruct"
+  d_vlm: 3584              # Qwen2.5-VL-7B hidden dimension
+
+  # Robot state + action
+  d_state: 14              # 7 joint pos + 7 joint vel
+  H: 16                    # Action chunk horizon
+  d_action: 7              # Δpose(6) + gripper(1)
+
+  # Action Expert (Flow Matching)
+  n_expert_layers: 8
+  n_euler_steps: 10        # Euler ODE steps at inference
+  lambda_ensemble: 0.01    # Temporal ensemble weight
+
+  # DA-CoT (Depth-Aware Chain-of-Thought)
+  n_cot_queries: 16        # Learnable CoT query tokens
+  d_cot: 512               # CoT internal dimension
+  K_obj: 8                 # Max objects to ground
+  K_grasp: 4               # Contact points per grasp
+  K_rel: 8                 # Spatial relation pairs
+  K_wp: 8                  # SE(3) motion waypoints
+
+training:
+  stages:
+    1:
+      epochs: 10
+      lr: 1.0e-4
+      description: "GST + State Encoder + DA-CoT + Expert (frozen VLM)"
+    2:
+      epochs: 20
+      lr: 5.0e-5
+      description: "+LoRA on VLM cross-attention"
+    3:
+      epochs: 10
+      lr: 1.0e-5
+      description: "Full fine-tune"
+
+  optimizer: "adamw"
+  batch_size: 32
+  gradient_accumulation_steps: 4
+  mixed_precision: true
+  grad_clip_norm: 1.0
+
+loss:
+  lambda_cot: 0.1          # DA-CoT loss weight
+  lambda_depth: 0.1        # Depth supervision weight
+  lambda_opacity: 0.01     # GST opacity regularization
+  lambda_scale: 0.001      # GST scale regularization
+  target_sparsity: 0.3     # Target Gaussian sparsity
+
+data:
+  datasets: [libero, metaworld, rlbench]
+  camera_fov: 60.0
+  depth_max: 5.0
+  num_workers: 8
+  max_instruction_len: 64
+
+hardware:
+  num_gpus: 4
+  gpu_type: "A100-80G"
+  inference_latency_target_ms: 200   # ~5Hz closed-loop
