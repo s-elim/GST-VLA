@@ -26,8 +26,8 @@ import argparse
 from pathlib import Path
 from collections import Counter
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from data.converters.rlbench_converter import RLBenchConverter, VALID_CAMERAS
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from data_loaders.rlbench_converter import RLBenchConverter, VALID_CAMERAS
 
 
 def parse_args():

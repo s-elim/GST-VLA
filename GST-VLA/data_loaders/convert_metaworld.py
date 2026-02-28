@@ -25,8 +25,8 @@ import sys
 import argparse
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from data.converters.metaworld_converter import (
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from data_loaders.metaworld_converter import (
     MetaWorldConverter, MT10_TASKS
 )
 

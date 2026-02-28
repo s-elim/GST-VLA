@@ -54,11 +54,11 @@ import numpy as np
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
-from data.converters.base_converter import (
+from data_loaders.base_converter import (
     BaseConverter, EpisodeData, EpisodeMeta,
     resize_rgb, resize_depth, build_K_from_fov, eef_to_delta_actions,
 )
-from data.converters.libero_converter import _quat_to_euler
+from data_loaders.libero_converter import _quat_to_euler
 
 import logging
 logger = logging.getLogger(__name__)

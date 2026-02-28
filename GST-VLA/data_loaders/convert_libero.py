@@ -21,8 +21,8 @@ import argparse
 import json
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from data.converters.libero_converter import LIBEROConverter
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from data_loaders.libero_converter import LIBEROConverter
 
 
 def parse_args():

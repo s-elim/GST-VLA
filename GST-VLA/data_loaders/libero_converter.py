@@ -50,7 +50,7 @@ import numpy as np
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
-from data.converters.base_converter import (
+from data_loaders.base_converter import (
     BaseConverter, EpisodeData, EpisodeMeta,
     resize_rgb, resize_depth, build_K_from_fov, eef_to_delta_actions,
 )
