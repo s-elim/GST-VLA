@@ -96,10 +96,18 @@ class QwenVLMWrapper(nn.Module):
 
         B, N_g, d = spatial_tokens.shape
         L = input_ids.shape[1]
-        device = spatial_tokens.device
+        base_model = getattr(self.model, "model", self.model)
+
+        embed_layer = self.model.get_input_embeddings()
+        embed_device = embed_layer.weight.device
+        input_ids = input_ids.to(embed_device)
 
         # Language token embeddings
-        lang_emb = self.model.model.embed_tokens(input_ids)  # (B, L, d_vlm)
+        lang_emb = embed_layer(input_ids)  # (B, L, d_vlm)
+
+        spatial_tokens = spatial_tokens.to(device=lang_emb.device, dtype=lang_emb.dtype)
+        if state_token is not None:
+            state_token = state_token.to(device=lang_emb.device, dtype=lang_emb.dtype)
 
         # Build combined sequence: [spatial | language | state?]
         parts = [spatial_tokens, lang_emb]
@@ -110,22 +118,25 @@ class QwenVLMWrapper(nn.Module):
         # Build combined attention mask
         N_total = combined.shape[1]
         if attention_mask is not None:
-            spatial_mask = torch.ones(B, N_g, dtype=attention_mask.dtype, device=device)
+            attention_mask = attention_mask.to(lang_emb.device)
+            spatial_mask = torch.ones(B, N_g, dtype=attention_mask.dtype, device=lang_emb.device)
             if state_token is not None:
-                state_mask = torch.ones(B, 1, dtype=attention_mask.dtype, device=device)
+                state_mask = torch.ones(B, 1, dtype=attention_mask.dtype, device=lang_emb.device)
                 combined_mask = torch.cat([spatial_mask, attention_mask, state_mask], dim=1)
             else:
                 combined_mask = torch.cat([spatial_mask, attention_mask], dim=1)
         else:
-            combined_mask = torch.ones(B, N_total, dtype=torch.long, device=device)
+            combined_mask = torch.ones(B, N_total, dtype=torch.long, device=lang_emb.device)
 
-        outputs = self.model.model(
+        outputs = base_model(
             inputs_embeds=combined,
             attention_mask=combined_mask,
             output_hidden_states=False,
             use_cache=False,
         )
-        return outputs.last_hidden_state  # (B, N_total, d_vlm)
+        if hasattr(outputs, "last_hidden_state"):
+            return outputs.last_hidden_state  # (B, N_total, d_vlm)
+        return outputs[0]
 
     def _mock_forward(
         self,

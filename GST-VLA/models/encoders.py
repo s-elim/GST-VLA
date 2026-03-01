@@ -49,7 +49,11 @@ class SigLIPEncoder(nn.Module):
 
     @torch.no_grad()
     def forward(self, pixel_values: torch.Tensor) -> torch.Tensor:
-        outputs = self.model(pixel_values=pixel_values, output_hidden_states=False)
+        model = self.model
+        if next(model.parameters()).device != pixel_values.device:
+            model = model.to(pixel_values.device)
+            self._model = model
+        outputs = model(pixel_values=pixel_values, output_hidden_states=False)
         hidden = outputs.last_hidden_state  # (B, N, d)
         # Remove CLS token if present
         if hidden.shape[1] == 257:
@@ -99,8 +103,10 @@ class DepthAnythingV2Encoder(nn.Module):
         self.model_size = model_size
         self.pretrained_path = pretrained_path
         self._model = None
+        self._load_attempted = False
 
     def _load(self):
+        self._load_attempted = True
         try:
             from depth_anything_v2.dpt import DepthAnythingV2 as DAv2
             model_configs = {
@@ -121,16 +127,20 @@ class DepthAnythingV2Encoder(nn.Module):
 
     @property
     def model(self):
-        if self._model is None:
+        if self._model is None and not self._load_attempted:
             self._load()
         return self._model
 
     @torch.no_grad()
     def forward(self, pixel_values: torch.Tensor) -> torch.Tensor:
-        if self.model is None:
+        model = self.model
+        if model is None:
             B, _, H, W = pixel_values.shape
             return torch.rand(B, H, W, device=pixel_values.device) * 5.0
-        depth = self.model(pixel_values)
+        if next(model.parameters()).device != pixel_values.device:
+            model = model.to(pixel_values.device)
+            self._model = model
+        depth = model(pixel_values)
         if depth.dim() == 4:
             depth = depth.squeeze(1)
         return depth  # (B, H, W)
