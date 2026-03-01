@@ -48,15 +48,26 @@ class QwenVLMWrapper(nn.Module):
         if self.use_mock:
             return
         try:
-            from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
+            from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor, BitsAndBytesConfig
+            import torch
+            
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.bfloat16,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4"
+            )
+
             self._model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-                self.model_name, torch_dtype=torch.bfloat16, device_map="auto",
+                self.model_name, 
+                quantization_config=quantization_config,
+                device_map="auto",
             )
             self._model.eval()
             for p in self._model.parameters():
                 p.requires_grad_(False)
             self._processor = AutoProcessor.from_pretrained(self.model_name)
-            print(f"[QwenVLM] Loaded {self.model_name} (frozen)")
+            print(f"[QwenVLM] Loaded {self.model_name} in 4-bit (frozen)")
         except Exception as e:
             print(f"[QwenVLM] Failed to load: {e}. Using mock.")
             self.use_mock = True

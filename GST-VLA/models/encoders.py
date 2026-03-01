@@ -31,7 +31,12 @@ class SigLIPEncoder(nn.Module):
 
     def _load(self):
         from transformers import SiglipVisionModel
-        self._model = SiglipVisionModel.from_pretrained(self.model_name)
+        import torch
+        self._model = SiglipVisionModel.from_pretrained(
+            self.model_name,
+            use_safetensors=True,
+            torch_dtype=torch.bfloat16
+        )
         self._model.eval()
         for p in self._model.parameters():
             p.requires_grad_(False)
