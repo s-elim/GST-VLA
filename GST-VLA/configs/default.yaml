@@ -8,7 +8,7 @@ model:
   sem_model: "google/siglip-so400m-patch14-224"
   d_sem: 1152              # SigLIP ViT-SO400M/14
   depth_model_size: "vitl"                                # Depth Anything V2 ViT-L
-  depth_pretrained_path: /home/selim/GST-VLA/GST-VLA/checkpoints/depth_anything_v2_vitl.pth"
+  depth_pretrained_path: /home/selim/GST-VLA/GST-VLA/checkpoints/depth_anything_v2_vitl.pth
 
   # GST (Gaussian Spatial Tokenizer)
   d_gst: 512               # GST output token dimension

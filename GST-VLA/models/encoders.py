@@ -9,6 +9,7 @@ Both branches are frozen during all training stages.
 
 import torch
 import torch.nn as nn
+from pathlib import Path
 from typing import Optional, Tuple
 
 
@@ -116,13 +117,21 @@ class DepthAnythingV2Encoder(nn.Module):
             }
             self._model = DAv2(**model_configs[self.model_size])
             if self.pretrained_path:
-                state = torch.load(self.pretrained_path, map_location="cpu", weights_only=True)
+                ckpt_path = Path(str(self.pretrained_path).strip().strip('"').strip("'"))
+                if not ckpt_path.exists():
+                    print(f"[DepthAnythingV2] Checkpoint not found: {ckpt_path}. Using mock depth encoder.")
+                    self._model = None
+                    return
+                state = torch.load(str(ckpt_path), map_location="cpu", weights_only=True)
                 self._model.load_state_dict(state)
             self._model.eval()
             for p in self._model.parameters():
                 p.requires_grad_(False)
         except ImportError:
             print("[DepthAnythingV2] Package not found, using mock depth encoder.")
+            self._model = None
+        except Exception as e:
+            print(f"[DepthAnythingV2] Failed to load model/checkpoint ({e}). Using mock depth encoder.")
             self._model = None
 
     @property
